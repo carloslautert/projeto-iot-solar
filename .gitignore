@@ -1,0 +1,41 @@
+# Variáveis de ambiente e credenciais
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# IDEs e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.bak
+
+# LaTeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc

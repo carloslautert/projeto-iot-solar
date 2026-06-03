@@ -1,0 +1,144 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\setstretch{1.15}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+
+\title{\textbf{Sistema IoT para Monitoramento do Potencial de Geração Solar em Florianópolis}}
+\author{
+Luis Felipe Candido Sola \\
+Carlos Henrique Braatz Lautert \\
+\small Engenharia Elétrica -- UFSC
+}
+\date{Junho de 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este relatório apresenta o desenvolvimento de um sistema IoT para monitoramento do potencial de geração solar em Florianópolis, Santa Catarina. O projeto utiliza dados meteorológicos reais fornecidos pela API Open-Meteo, como irradiância solar, temperatura, umidade relativa e velocidade do vento. A partir desses dados, o sistema estima a potência fotovoltaica disponível para uma área simulada de painéis solares e envia as informações para a plataforma TagoIO por meio de requisições HTTP. Os dados são então visualizados em um dashboard, permitindo acompanhar o comportamento da geração estimada em tempo próximo do real. O foco do trabalho é demonstrar a integração entre coleta de dados em nuvem, processamento em Python e visualização em plataforma IoT.
+\end{abstract}
+
+\section{Introdução}
+
+A geração solar fotovoltaica é uma das principais alternativas para diversificação da matriz energética e aproveitamento de fontes renováveis. A quantidade de energia gerada por um sistema fotovoltaico depende diretamente da irradiância solar incidente, além de fatores como temperatura, área dos módulos e eficiência dos painéis.
+
+Neste projeto, foi desenvolvido um sistema de monitoramento baseado em Internet das Coisas (IoT) para estimar o potencial de geração solar em Florianópolis. Em vez de utilizar sensores físicos instalados em campo, o sistema utiliza dados meteorológicos reais disponibilizados por uma API pública. Essa abordagem permite simular um cenário de monitoramento remoto com menor custo e boa capacidade de demonstração acadêmica.
+
+\section{Objetivos}
+
+O objetivo principal do projeto é implementar um sistema IoT capaz de coletar dados meteorológicos reais, calcular a potência fotovoltaica estimada e enviar os resultados para uma plataforma de visualização em nuvem.
+
+Os objetivos específicos são:
+
+\begin{itemize}
+    \item coletar dados de irradiância solar, temperatura, umidade e vento para Florianópolis;
+    \item estimar a potência fotovoltaica a partir de uma área e eficiência de painel definidas;
+    \item classificar o status de geração como alta, média ou baixa;
+    \item enviar os dados processados para o TagoIO via HTTP;
+    \item visualizar as variáveis em um dashboard IoT.
+\end{itemize}
+
+\section{Metodologia}
+
+O sistema foi desenvolvido em Python e executa ciclos periódicos de coleta, processamento e envio de dados. A fonte de dados utilizada é a API Open-Meteo, configurada para retornar informações horárias referentes às coordenadas geográficas de Florianópolis, aproximadamente latitude $-27{,}5954$ e longitude $-48{,}5480$.
+
+A cada ciclo, o programa consulta a API, extrai a leitura correspondente à hora atual e calcula a potência fotovoltaica estimada. Em seguida, o status da geração é definido com base no valor da irradiância solar. Por fim, as variáveis são organizadas em formato JSON e enviadas ao TagoIO utilizando o token do dispositivo.
+
+\section{Arquitetura do Sistema}
+
+A arquitetura do projeto é composta por três blocos principais: fonte de dados, processamento local e plataforma IoT em nuvem.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Bloco} & \textbf{Tecnologia} & \textbf{Função} \\
+\midrule
+Fonte de dados & Open-Meteo & Fornecer dados meteorológicos reais \\
+Processamento & Python & Calcular potência e status de geração \\
+Nuvem IoT & TagoIO & Armazenar e exibir as variáveis \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O fluxo do sistema pode ser resumido da seguinte forma:
+
+\begin{enumerate}
+    \item o script Python consulta a API Open-Meteo;
+    \item os dados horários são filtrados para a leitura atual;
+    \item a potência fotovoltaica é estimada;
+    \item o status de geração é classificado;
+    \item os dados são enviados ao TagoIO via HTTP;
+    \item o dashboard apresenta as medições ao usuário.
+\end{enumerate}
+
+\section{Cálculo da Potência Fotovoltaica}
+
+A potência fotovoltaica estimada foi calculada com base na irradiância solar, área dos painéis, eficiência e uma correção simplificada de temperatura. A equação utilizada é:
+
+\begin{equation}
+P = G \cdot A \cdot \eta \cdot \left[1 - \gamma \cdot (T - 25)\right]
+\end{equation}
+
+em que $P$ é a potência estimada em watts, $G$ é a irradiância solar em W/m$^2$, $A$ é a área total dos painéis em m$^2$, $\eta$ é a eficiência do painel, $T$ é a temperatura em $^\circ$C e $\gamma$ é o coeficiente térmico simplificado, adotado como $0{,}004/ ^\circ$C.
+
+No projeto, foi considerada uma área simulada de $10$ m$^2$ e eficiência de $20\%$, representando um conjunto fotovoltaico residencial simplificado. Essa estimativa não substitui um dimensionamento técnico completo, mas é suficiente para demonstrar a relação entre condições meteorológicas e potencial de geração.
+
+\section{Integração com o TagoIO}
+
+A integração com o TagoIO foi realizada por meio de requisições HTTP do tipo POST. O script monta uma lista de variáveis contendo os valores calculados e medidos, enviando os dados para o endpoint da plataforma com autenticação por token do dispositivo.
+
+As variáveis enviadas são: irradiância, temperatura, umidade, vento, potência estimada e status de geração. O token do TagoIO foi removido do código-fonte e passou a ser lido por variável de ambiente, utilizando um arquivo local \texttt{.env}. Essa prática evita a exposição de credenciais no GitHub e melhora a segurança do projeto.
+
+\section{Resultados Esperados e Observados}
+
+Como resultado, espera-se que o sistema envie periodicamente seis variáveis ao TagoIO, permitindo acompanhar o potencial de geração solar em Florianópolis por meio de gráficos, indicadores e cards no dashboard. Durante períodos de maior irradiância, o status tende a ser classificado como alta geração. Em horários com baixa irradiância, como noite, chuva ou forte nebulosidade, o status tende a ser classificado como baixa geração.
+
+A classificação utilizada foi definida da seguinte forma:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Status} & \textbf{Critério} \\
+\midrule
+Alta & irradiância $\geq 200$ W/m$^2$ \\
+Média & $50 \leq$ irradiância $< 200$ W/m$^2$ \\
+Baixa & irradiância $< 50$ W/m$^2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Essa lógica permite transformar os dados numéricos em uma interpretação simples para o usuário final.
+
+\section{Conclusão}
+
+O projeto demonstrou a construção de um sistema IoT completo para monitoramento do potencial de geração solar, integrando coleta de dados reais, processamento em Python, cálculo fotovoltaico e visualização em plataforma de nuvem. A solução preserva a ideia de um sistema de monitoramento remoto, mesmo sem a utilização de sensores físicos, e mostra como dados meteorológicos podem ser utilizados para estimar o comportamento de sistemas fotovoltaicos.
+
+Além da implementação técnica, o projeto foi organizado para entrega acadêmica e publicação em repositório GitHub, com separação entre código-fonte, documentação, relatório e variáveis de ambiente. A remoção do token do código-fonte e o uso de arquivo \texttt{.env} tornam a solução mais segura e adequada para compartilhamento público.
+
+\section*{Referências}
+
+\begin{itemize}
+    \item Open-Meteo. \textit{Weather Forecast API}. Disponível em: \url{https://open-meteo.com/}.
+    \item TagoIO. \textit{IoT Platform, Dashboards and Device Data}. Disponível em: \url{https://tago.io/}.
+    \item Notas e materiais da disciplina de Tópico Avançado em Telecomunicações IV / Redes de Sensores sem Fio para IoT, UFSC, 2026.
+\end{itemize}
+
+\end{document}
